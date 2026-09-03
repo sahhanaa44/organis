@@ -1,0 +1,35 @@
+name: Organis CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Client
+        run: |
+          cd client
+          npm install
+
+      - name: Install Server
+        run: |
+          cd server
+          npm install
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install AI Service
+        run: |
+          cd ai-service
+          pip install -r requirements.txt
