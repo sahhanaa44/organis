@@ -1,35 +1,41 @@
-name: Organis CI
+name: Build and Push Docker Images
 
 on:
   push:
-  pull_request:
+    branches:
+      - main
 
 jobs:
-  build:
+  docker:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
         with:
-          node-version: 22
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Install Client
-        run: |
-          cd client
-          npm install
-
-      - name: Install Server
-        run: |
-          cd server
-          npm install
-
-      - uses: actions/setup-python@v5
+      - name: Build and Push Server
+        uses: docker/build-push-action@v6
         with:
-          python-version: "3.12"
+          context: ./server
+          push: true
+          tags: shn4/organis-server:latest
 
-      - name: Install AI Service
-        run: |
-          cd ai-service
-          pip install -r requirements.txt
+      - name: Build and Push Client
+        uses: docker/build-push-action@v6
+        with:
+          context: ./client
+          push: true
+          tags: shn4/organis-client:latest
+
+      - name: Build and Push AI Service
+        uses: docker/build-push-action@v6
+        with:
+          context: ./ai-service
+          push: true
+          tags: shn4/organis-ai-service:latest
